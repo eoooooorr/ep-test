@@ -45,9 +45,10 @@ def preprocess_captcha(image_path):
     image = cv2.imread(image_path)
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     
-    # 過濾藍色範圍（驗證碼主要顏色為 R62 G99 B240）
-    lower_blue = np.array([100, 100, 100])
-    upper_blue = np.array([140, 255, 255])
+    # 過濾藍色範圍（驗證碼顏色範圍為 #7b69bd, #adabda 和 #53939f）
+    # 顏色範圍: [R62 G99 B240] 和 [#7b69bd] 和 [#adabda] 和 [#53939f]
+    lower_blue = np.array([90, 100, 100])   # 可以調整為稍微寬鬆的範圍
+    upper_blue = np.array([150, 255, 255])  # 顏色範圍（包含 #53939f, #7b69bd 和 #adabda）
     mask = cv2.inRange(hsv, lower_blue, upper_blue)
     mask_inv = cv2.bitwise_not(mask)
     
@@ -61,7 +62,7 @@ def preprocess_captcha(image_path):
     _, binary = cv2.threshold(result, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     
     # 去除雜訊
-    binary = del_noise(binary, 3)
+    binary = del_noise(binary, 4)
     
     # 進一步清理小型噪點
     kernel = np.ones((2, 2), np.uint8)
